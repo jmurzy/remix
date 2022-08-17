@@ -40,7 +40,7 @@ export const createRequestHandler: CreateRequestHandlerFunction = (
 
   let serverMode = isServerMode(mode) ? mode : ServerMode.Production;
 
-  return async function requestHandler(request, loadContext) {
+  return async function requestHandler(request, loadContext = {}) {
     let url = new URL(request.url);
     let matches = matchServerRoutes(routes, url.pathname);
 
@@ -91,7 +91,7 @@ async function handleDataRequest({
   serverMode,
 }: {
   handleDataRequest?: HandleDataRequestFunction;
-  loadContext?: AppLoadContext;
+  loadContext: AppLoadContext;
   matches: RouteMatch<ServerRoute>[];
   request: Request;
   serverMode: ServerMode;
@@ -189,7 +189,7 @@ async function handleDocumentRequest({
   serverMode,
 }: {
   build: ServerBuild;
-  loadContext?: AppLoadContext;
+  loadContext: AppLoadContext;
   matches: RouteMatch<ServerRoute>[] | null;
   request: Request;
   rootRoute?: ServerRoute;
@@ -524,7 +524,7 @@ async function handleResourceRequest({
   serverMode,
 }: {
   request: Request;
-  loadContext?: AppLoadContext;
+  loadContext: AppLoadContext;
   matches: RouteMatch<ServerRoute>[];
   serverMode: ServerMode;
 }): Promise<Response> {

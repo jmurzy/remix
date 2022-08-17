@@ -740,15 +740,15 @@ export function Meta() {
           if (isOpenGraphTag) {
             return (
               <meta
+                property={name}
                 content={content as string}
                 key={name + content}
-                property={name}
               />
             );
           }
 
           if (typeof content === "string") {
-            return <meta content={content} name={name} key={name + content} />;
+            return <meta name={name} content={content} key={name + content} />;
           }
 
           return <meta key={name + JSON.stringify(content)} {...content} />;
@@ -810,14 +810,17 @@ export function Scripts(props: ScriptProps) {
     let routeModulesScript = `${matchesWithModules
       .map(
         (match, index) =>
-          `import * as route${index} from ${JSON.stringify(
+          `import ${JSON.stringify(manifest.url)};
+import * as route${index} from ${JSON.stringify(
             manifest.routes[match.route.id].module
           )};`
       )
       .join("\n")}
 window.__remixRouteModules = {${matchesWithModules
       .map((match, index) => `${JSON.stringify(match.route.id)}:route${index}`)
-      .join(",")}};`;
+      .join(",")}};
+      
+import(${JSON.stringify(manifest.entry.module)});`;
 
     return (
       <>
@@ -825,14 +828,14 @@ window.__remixRouteModules = {${matchesWithModules
           {...props}
           suppressHydrationWarning
           dangerouslySetInnerHTML={createHtml(contextScript)}
+          type={undefined}
         />
-        <script {...props} src={manifest.url} />
         <script
           {...props}
           dangerouslySetInnerHTML={createHtml(routeModulesScript)}
           type="module"
+          async
         />
-        <script {...props} src={manifest.entry.module} type="module" />
       </>
     );
     // disabled deps array because we are purposefully only rendering this once
@@ -868,6 +871,11 @@ window.__remixRouteModules = {${matchesWithModules
 
   return (
     <>
+      <link
+        rel="modulepreload"
+        href={manifest.entry.module}
+        crossOrigin={props.crossOrigin}
+      />
       {dedupe(preloads).map((path) => (
         <link
           key={path}
